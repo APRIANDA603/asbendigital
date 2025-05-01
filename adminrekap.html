@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Admin - Rekap Absen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .dashboard-wrapper {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 80%;
+      max-width: 900px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+
+    .header h2 {
+      color: #fff;
+      font-size: 1.5rem;
+    }
+
+    .table-container {
+      margin-top: 20px;
+      overflow-x: auto;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      color: #fff;
+    }
+
+    th {
+      background-color: #2196f3;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #2c3e50;
+    }
+
+    tr:hover {
+      background-color: #34495e;
+    }
+
+    .btn-export {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      margin-top: 20px;
+    }
+
+    .btn-export:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+
+    .logout-btn {
+      background-color: #e74c3c;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      margin-top: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .logout-btn:hover {
+      background-color: #c0392b;
+      transform: scale(1.05);
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .action-btns button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .action-btns .edit-btn {
+      background-color: #ff9800;
+      color: white;
+    }
+
+    .action-btns .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .action-btns button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <!-- Header with logo and title -->
+    <div class="header">
+      <img src="logosdntetaan.png" alt="Logo Sekolah">
+      <h2>Rekap Absen Guru SD N TETAAN</h2>
+    </div>
+
+    <!-- Table container -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Guru</th>
+            <th>Keterangan</th>
+            <th>Jam Masuk</th>
+            <th>Jam Pulang</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="rekapTable">
+          <!-- Data Rekap Absen akan ditampilkan di sini -->
+        </tbody>
+      </table>
+    </div>
+
+    <button class="btn-export" onclick="exportToExcel()">Ekspor ke Excel</button>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <div class="footer">
+      <p>© 2025 SD NEGERI TETAAN. Semua Hak Cipta Dilindungi.</p>
+    </div>
+  </div>
+
+  <script>
+    // Function untuk logout
+    function logout() {
+      localStorage.setItem("loggedIn", "false");
+      window.location.href = "login.html";
+    }
+
+    // Function untuk mengambil data absen dari localStorage dan menampilkan ke dalam tabel
+    function loadRekapAbsen() {
+      const rekapAbsen = JSON.parse(localStorage.getItem("rekapAbsen") || "[]");
+      const rekapTable = document.getElementById("rekapTable");
+      rekapTable.innerHTML = ""; // Clear table before adding new data
+
+      rekapAbsen.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        const cellNo = document.createElement("td");
+        cellNo.textContent = index + 1;
+        row.appendChild(cellNo);
+
+        const cellNama = document.createElement("td");
+        cellNama.textContent = item.nama;
+        row.appendChild(cellNama);
+
+        const cellKeterangan = document.createElement("td");
+        cellKeterangan.textContent = item.keterangan;
+        row.appendChild(cellKeterangan);
+
+        const cellJamMasuk = document.createElement("td");
+        cellJamMasuk.textContent = formatTime(item.jamMasuk);
+        row.appendChild(cellJamMasuk);
+
+        const cellJamPulang = document.createElement("td");
+        cellJamPulang.textContent = formatTime(item.jamPulang);
+        row.appendChild(cellJamPulang);
+
+        const cellTanggal = document.createElement("td");
+        cellTanggal.textContent = item.tanggal;
+        row.appendChild(cellTanggal);
+
+        // Add Edit and Delete buttons
+        const cellAksi = document.createElement("td");
+        const editBtn = document.createElement("button");
+        editBtn.classList.add("edit-btn");
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => editAbsen(index);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("delete-btn");
+        deleteBtn.textContent = "Hapus";
+        deleteBtn.onclick = () => deleteAbsen(index);
+
+        const actionDiv = document.createElement("div");
+        actionDiv.classList.add("action-btns");
+        actionDiv.appendChild(editBtn);
+        actionDiv.appendChild(deleteBtn);
+
+        cellAksi.appendChild(actionDiv);
+        row.appendChild(cellAksi);
+
+        rekapTable.appendChild(row);
+      });
+    }
+
+    // Function untuk format waktu (HH:MM)
+    function formatTime(time) {
+      const date = new Date(`1970-01-01T${time}Z`);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Function untuk mengedit data absen
+    function editAbsen(index) {
+      const rekapAbsen = JSON.parse(localStorage.getItem("rekapAbsen") || "[]");
+      const item = rekapAbsen[index];
+
+      // Allow the admin to edit the data (prompt or a form could be used here)
+      const newNama = prompt("Edit Nama Guru:", item.nama);
+      const newKeterangan = prompt("Edit Keterangan:", item.keterangan);
+      const newJamMasuk = prompt("Edit Jam Masuk (HH:MM):", item.jamMasuk);
+      const newJamPulang = prompt("Edit Jam Pulang (HH:MM):", item.jamPulang);
+      const newTanggal = prompt("Edit Tanggal:", item.tanggal);
+
+      // Update the record
+      if (newNama && newKeterangan && newJamMasuk && newJamPulang && newTanggal) {
+        rekapAbsen[index] = {
+          ...item,
+          nama: newNama,
+          keterangan: newKeterangan,
+          jamMasuk: newJamMasuk,
+          jamPulang: newJamPulang,
+          tanggal: newTanggal
+        };
+
+        localStorage.setItem("rekapAbsen", JSON.stringify(rekapAbsen));
+        loadRekapAbsen();
+      }
+    }
+
+    // Function untuk menghapus data absen
+    function deleteAbsen(index) {
+      const rekapAbsen = JSON.parse(localStorage.getItem("rekapAbsen") || "[]");
+      rekapAbsen.splice(index, 1);
+      localStorage.setItem("rekapAbsen", JSON.stringify(rekapAbsen));
+      loadRekapAbsen();
+    }
+
+    // Function untuk ekspor data absen ke dalam format Excel
+    function exportToExcel() {
+      const rekapAbsen = JSON.parse(localStorage.getItem("rekapAbsen") || "[]");
+      let tableData = "No, Nama Guru, Keterangan, Jam Masuk, Jam Pulang, Tanggal\n";
+
+      rekapAbsen.forEach((item, index) => {
+        tableData += `${index + 1}, ${item.nama}, ${item.keterangan}, ${formatTime(item.jamMasuk)}, ${formatTime(item.jamPulang)}, ${item.tanggal}\n`;
+      });
+
+      const blob = new Blob([tableData], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "rekap_absen.csv";
+      link.click();
+    }
+
+    // Load rekap absen saat halaman dibuka
+    window.onload = loadRekapAbsen;
+  </script>
+</body>
+</html>

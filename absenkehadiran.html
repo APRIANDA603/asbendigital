@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Absen Kehadiran Guru</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #001f3f, #003366, #005f99);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      animation: fadeIn 1s ease;
+    }
+    .absen-container {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 400px;
+      color: #ffffff;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      animation: slideUp 0.8s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    header img.logo {
+      width: 80px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      animation: bounceIn 1s ease;
+    }
+    header h1 {
+      font-size: 22px;
+      margin: 10px 0;
+      color: #a3d5ff;
+    }
+    .clock-box {
+      margin-bottom: 20px;
+    }
+    .clock-box h2 {
+      font-size: 28px;
+      color: #ffffff;
+    }
+    .camera-box video {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: transform 0.2s, background-color 0.3s;
+    }
+    .btn.masuk { background-color: #2196f3; }
+    .btn.pulang { background-color: #f44336; }
+    .btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+    #statusMessage { display: none; padding: 12px; background-color: rgba(33, 150, 243, 0.2); color: #d0eaff; border-radius: 8px; animation: fadeInUp 0.5s ease; }
+    .logout {
+      background-color: #ffffff;
+      border: none;
+      color: #003366;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .logout:hover { transform: scale(1.05); background-color: #d4e8ff; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <script>
+    if (localStorage.getItem("loggedIn") !== "true") {
+      alert("Silakan login terlebih dahulu.");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <div class="absen-container" id="mainContainer">
+    <header>
+      <img src="logosdntetaan.png" class="logo" alt="Logo Sekolah">
+      <h1>SD NEGERI TETAAN</h1>
+      <p>Selamat datang, <span id="user-name"></span>!</p>
+    </header>
+
+    <div class="clock-box">
+      <h2 id="clock">--:--:--</h2>
+      <p id="date">Memuat tanggal...</p>
+    </div>
+
+    <div class="camera-box">
+      <video id="camera" autoplay muted playsinline></video>
+    </div>
+
+    <canvas id="snapshot" style="display:none;"></canvas>
+    <img id="preview" style="display:none;" alt="Hasil Absen"/>
+
+    <div class="buttons">
+      <button id="btnMasuk" class="btn masuk">Absen Masuk</button>
+      <button id="btnPulang" class="btn pulang">Absen Pulang</button>
+    </div>
+
+    <div id="statusMessage"></div>
+
+    <button onclick="logout()" class="logout">Logout</button>
+  </div>
+
+  <script>
+    let clockInterval;
+
+    async function startCamera() {
+      const video = document.getElementById('camera');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) {
+        alert("Kamera tidak tersedia.");
+        console.error(err);
+      }
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const jam = String(now.getHours()).padStart(2, '0');
+      const menit = String(now.getMinutes()).padStart(2, '0');
+      const detik = String(now.getSeconds()).padStart(2, '0');
+      const tanggal = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+
+      document.getElementById("clock").textContent = `${jam}:${menit}:${detik}`;
+      document.getElementById("date").textContent = tanggal;
+    }
+
+    function showStatus(jenisAbsen) {
+      const now = new Date();
+      const waktu = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      const msg = document.getElementById("statusMessage");
+
+      msg.innerHTML = `<strong>✅ Anda telah ${jenisAbsen} pada pukul ${waktu}</strong>`;
+      msg.style.display = "block";
+
+      setTimeout(() => {
+        msg.style.display = "none";
+      }, 4000);
+    }
+
+    document.getElementById("btnMasuk").addEventListener("click", () => {
+      showStatus("absen masuk");
+      simpanAbsen("Masuk");
+    });
+
+    document.getElementById("btnPulang").addEventListener("click", () => {
+      showStatus("absen pulang");
+      simpanAbsen("Pulang");
+    });
+
+    function simpanAbsen(keterangan) {
+      const namaGuru = localStorage.getItem("user") || "Guru";
+      const waktu = new Date().toLocaleString();
+      const tanggal = `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`;
+
+      const dataAbsen = {
+        nama: namaGuru,
+        keterangan: keterangan,
+        waktu: waktu,
+        tanggal: tanggal
+      };
+
+      const rekapAbsen = JSON.parse(localStorage.getItem("rekapAbsen") || "[]");
+
+      rekapAbsen.push(dataAbsen);
+      localStorage.setItem("rekapAbsen", JSON.stringify(rekapAbsen));
+    }
+
+    function logout() {
+      const container = document.getElementById("mainContainer");
+      container.style.animation = "fadeOut 0.6s ease forwards";
+      setTimeout(() => {
+        localStorage.setItem("loggedIn", "false");
+        window.location.href = "login.html";
+      }, 600);
+    }
+
+    window.onload = () => {
+      document.getElementById("user-name").textContent = localStorage.getItem("user") || "Guru";
+      startCamera();
+      updateClock();
+      clockInterval = setInterval(updateClock, 1000);
+    };
+  </script>
+</body>
+</html>

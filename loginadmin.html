@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login Admin - Absen Digital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .login-wrapper {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 1s ease;
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 10px;
+      animation: bounceIn 1s ease;
+    }
+
+    .school-name {
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      color: #ddd;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-group .icon {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      color: #888;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px 10px 10px 35px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background-color: #f5f5f5;
+    }
+
+    .forgot {
+      display: block;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #cce;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .forgot:hover {
+      color: #fff;
+    }
+
+    .btn-masuk {
+      background-color: #00c3ff;
+      color: #fff;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn-masuk:hover {
+      background-color: #009cd3;
+      transform: scale(1.02);
+    }
+
+    .fade-out {
+      animation: fadeOut 0.8s forwards;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-30px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeOut {
+      from {opacity: 1;}
+      to {opacity: 0; transform: translateY(30px);}
+    }
+
+    @keyframes bounceIn {
+      0% {transform: scale(0.8); opacity: 0;}
+      100% {transform: scale(1); opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper" id="loginBox">
+    <img src="logosdntetaan.png" alt="Logo Sekolah" class="logo" />
+    <h2 class="school-name">SD NEGERI TETAAN</h2>
+    <p class="welcome-text">Selamat datang di Sistem Absen Digital Admin</p>
+    
+    <form class="login-form" onsubmit="return loginAdmin(event)">
+      <div class="input-group">
+        <i class="fas fa-user icon"></i>
+        <input type="text" id="username" placeholder="Username" required />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock icon"></i>
+        <input type="password" id="password" placeholder="Kata Sandi" required />
+      </div>
+      <a href="#" class="forgot">Lupa Kata Sandi?</a>
+      <button type="submit" class="btn-masuk">MASUK</button>
+    </form>
+  </div>
+
+  <script>
+    function loginAdmin(event) {
+      event.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // Data login admin (username dan password)
+      const akunAdmin = {
+        admin: "admin123"
+      };
+
+      if (akunAdmin[username] && akunAdmin[username] === password) {
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("user", username);
+
+        const box = document.getElementById("loginBox");
+        box.classList.add("fade-out");
+
+        setTimeout(() => {
+          window.location.href = "admin-rekap.html"; // Redirect ke halaman rekap absen admin
+        }, 800); // Setelah animasi selesai
+      } else {
+        alert("Username atau password salah.");
+      }
+    }
+  </script>
+</body>
+</html>
